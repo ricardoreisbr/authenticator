@@ -1,7 +1,11 @@
 import axios from "axios";
 
-const api = axios.create({
+const authorizationServerApi = axios.create({
   baseURL: "http://localhost:3001/",
 });
 
-export default api;
+const resourceServerApi = axios.create({
+  baseURL: "http://localhost:3002/",
+});
+
+export { authorizationServerApi, resourceServerApi };

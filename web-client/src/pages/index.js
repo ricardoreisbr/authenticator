@@ -1,15 +1,30 @@
+import { useState } from "react";
 import Head from "next/head";
 import { useForm } from "react-hook-form";
-import api from "../services/api";
+import { authorizationServerApi, resourceServerApi } from "../services/api";
 
 export default function Home() {
+  const [dataHomePage, setDataHomePage] = useState({});
   const { register, handleSubmit, errors } = useForm();
   const onSubmit = (data) => handleSignIn(data);
 
   const handleSignIn = async (data) => {
     try {
-      const response = await api.post("/login", { ...data });
-      console.log(response);
+      const authorizationServerResponse = await authorizationServerApi.post(
+        "/login",
+        { ...data }
+      );
+
+      const { token_type, access_token } = authorizationServerResponse.data;
+
+      const resourceServerResponse = await resourceServerApi.get("/profile", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${token_type} ${access_token}`,
+        },
+      });
+
+      setDataHomePage(resourceServerResponse);
     } catch (_err) {
       console.log("Houve um problema com o login!");
     }
@@ -47,6 +62,9 @@ export default function Home() {
 
           <input type="submit" />
         </form>
+        <br />
+        {dataHomePage.data?.email}
+        {dataHomePage.data?.cellphone}
       </main>
     </div>
   );

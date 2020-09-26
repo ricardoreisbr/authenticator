@@ -10,7 +10,7 @@ const users = [
   {
     id: "1",
     email: "ricardoreis@outlook.com",
-    cellphone: "973367189",
+    cellphone: "973367188",
     password: "123",
   },
   {
@@ -22,7 +22,7 @@ const users = [
 ];
 
 const secretKey = process.env.SECRET_KEY || "guto";
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3002;
 
 const app = express();
 
@@ -32,29 +32,23 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(morgan("combined"));
 
-function createToken(email) {
-  const payload = { email };
-  const token = jwt.sign(payload, secretKey);
-
-  return {
-    access_token: token,
-    token_type: "Bearer",
-  };
+function handleProfilePage(user) {
+  return { email: user.email, cellphone: user.cellphone };
 }
 
-function authorization(user) {
-  const { email, password } = user;
+app.get("/profile", (req, res) => {
+  const { authorization } = req.headers;
+  const token = authorization.split(" ")[1];
 
-  data = users.filter(
-    (item) => item.email == email && item.password == password
-  );
+  try {
+    const decoded = jwt.verify(token, secretKey);
+    const user = users.filter((item) => item.email == decoded.email);
+    const result = handleProfilePage(user[0]);
 
-  return data.length ? createToken(email) : {};
-}
-
-app.post("/login", (req, res) => {
-  const token = authorization(req.body);
-  res.json(token);
+    res.json(result);
+  } catch (err) {
+    res.json({});
+  }
 });
 
 app.listen(port, () => {
