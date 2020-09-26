@@ -21,7 +21,7 @@ const users = [
   },
 ];
 
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 3001;
 
 const app = express();
 
@@ -54,7 +54,9 @@ function authorization(user) {
   return data.length ? createToken(email) : {};
 }
 
-app.get("/login", (req, res) => {
+app.post("/login", (req, res) => {
+  console.log(req.body)
+  // console.log(res)
   const token = authorization(req.body);
   res.json(token);
 });
